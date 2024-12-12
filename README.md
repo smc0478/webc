@@ -1,6 +1,6 @@
 # webc
 web server
-=======
+
 # Webc web server library
 WebC is web server library developed in C.
 
