@@ -2,10 +2,7 @@
 *.d
 
 # Object files
-<<<<<<< HEAD
-=======
 obj/
->>>>>>> 1562fd9 (webc 0.0.1)
 *.o
 *.ko
 *.obj
@@ -21,10 +18,7 @@ obj/
 *.pch
 
 # Libraries
-<<<<<<< HEAD
-=======
 lib/
->>>>>>> 1562fd9 (webc 0.0.1)
 *.lib
 *.a
 *.la
@@ -36,12 +30,9 @@ lib/
 *.so.*
 *.dylib
 
-<<<<<<< HEAD
-=======
 # Includes
 include/*
 
->>>>>>> 1562fd9 (webc 0.0.1)
 # Executables
 *.exe
 *.out
@@ -64,3 +55,4 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+

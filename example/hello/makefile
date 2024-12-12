@@ -9,10 +9,10 @@ main.o: main.c
 	gcc -c $< -I$(INCLUDEDIR)
 
 dynamic: main.o
-	gcc -L$(LIBDIR) -o hello $< -lwebc
+	gcc -L$(LIBDIR) -o hello.out $< -lwebc
 
 static: main.o
-	gcc --static -o hello_static $< -L$(LIBDIR) -lwebc
+	gcc --static -o hello_static.out $< -L$(LIBDIR) -lwebc
 
 clean:
-	rm -f main.o hello hello_static
+	rm -f main.o *.out
