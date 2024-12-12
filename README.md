@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # webc
 web server
 =======
@@ -33,4 +32,3 @@ Required:
 - refactoring
 - optimize
 - documentation
->>>>>>> 1562fd9 (webc 0.0.1)
