@@ -12,8 +12,24 @@ It provides a shared library(libwebc).
 make
 ```
 
-## example
+## Example
 Please refer to the 'example' folder.
+
+### build
+```bash
+make
+```
+
+### test
+```bash
+source env_set.sh
+./[path/to/executable file].out
+```
+
+```bash
+curl 127.0.0.1:8080
+# output: hello world!
+```
 
 ## Dependency
 Required:
