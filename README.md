@@ -31,6 +31,8 @@ curl 127.0.0.1:8080
 # output: hello world!
 ```
 
+![example](./img/example.png)
+
 ## Dependency
 Required:
 - C compiler
