@@ -94,7 +94,7 @@ void wc_http_write(wc* wc) {
 }
 
 void wc_handle_route(wc *wc, wc_route *route) {
-    wc->response = route->f(*(wc->request));
+    wc->response = route->f(wc->request);
 }
 
 void wc_server_init(int port) {
@@ -122,14 +122,14 @@ void wc_server_start() {
     wc_socket_listen(wc->server);
 
     while(1){
-    wc_socket_accept(wc->server);
+        wc_socket_accept(wc->server);
 
-    wc_http_read(wc);
+        wc_http_read(wc);
 
-    wc_route* route = wc_get_route(wc, wc->request);
-    wc_handle_route(wc, route);
+        wc_route* route = wc_get_route(wc, wc->request);
+        wc_handle_route(wc, route);
 
-    wc_http_write(wc);
-    close(wc->server->client_fd);
+        wc_http_write(wc);
+        close(wc->server->client_fd);
     }
 }

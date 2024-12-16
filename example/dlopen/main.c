@@ -14,7 +14,7 @@ void dlsym_error() {
     }
 }
 
-wc_resp* hello(wc_req req) {
+wc_resp* hello(wc_req* req) {
     wc_resp* (*make_resp)(int, char*);
     make_resp = dlsym(handle, "wc_response");
     dlsym_error();

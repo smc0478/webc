@@ -86,9 +86,9 @@ wc_req* wc_parse_request(char *http) {
             }
             case req_method_fin:
             {
-                if(cur_method == OTHERS || match[i-prev_idx-1] != '\0') {
+                if(cur_method == OTHERS || match[i-prev_idx-1] != '\0')
                     req->method = strndup(&http[prev_idx],i-prev_idx-1);
-                } else
+                else
                     req->method = method_str[cur_method];
 
                 prev_idx = i;
@@ -104,10 +104,11 @@ wc_req* wc_parse_request(char *http) {
                 if(ch == ' ') {
                     req->path = strndup(&http[prev_idx],i-prev_idx);
                     cur_state = req_proto_ver;
-                } else if(ch == '?')
+                } else if(ch == '?') {
                     req->path = strndup(&http[prev_idx],i-prev_idx);
                     prev_idx = i + 1;
                     cur_state = req_query_key;
+                }
                 break;
             }
             case req_query_key:

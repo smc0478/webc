@@ -16,7 +16,7 @@ struct _wc {
 };
 typedef struct _wc wc;
 
-typedef wc_resp* (*wc_handler)(wc_req);
+typedef wc_resp* (*wc_handler)(wc_req*);
 
 struct _wc_route {
     char* method;
