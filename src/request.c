@@ -48,12 +48,12 @@ char* wc_request_get_param(wc_req *req, param kind, char *key) {
 }
 
 char* wc_request_get_header(wc_req *req, char *key) {
-    data* value;
+    char* value;
 
-    if((value = dict_find_data(&req->header, key)) == NULL)
+    if((value = (char*)dict_find_data(&req->header, key)) == NULL)
         return NULL;
 
-    return value->value;
+    return value;
 }
 
 char* wc_request_get_body(wc_req *req) {
