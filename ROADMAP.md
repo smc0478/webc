@@ -2,6 +2,14 @@
 
 This roadmap outlines practical next steps for turning WebC into a more production-ready C web server library.
 
+## ✅ Finished improvements
+
+- **HTTP correctness and protocol hardening** *(completed)*
+  - Added strict validation for request-line and header format.
+  - Enforced limits for total request size, start-line size, header line size, header count, and body size.
+  - Added strict `Content-Length` validation (numeric + exact body-length match).
+  - Standardized malformed input handling to fail request parsing and return `400 Bad Request` in server flow.
+
 ## 1) Essential (Must-have)
 
 These items are foundational for reliability, safety, and maintainability.
