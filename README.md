@@ -56,7 +56,6 @@ curl -i "http://127.0.0.1:8080/name?name=webc"
 - make
 
 ## Roadmap
-- cookie / session / file features
-- logging
-- more tests
-- more documentation
+For a structured plan with **Essential (must-have)** and **Nice-to-have** items, see:
+
+- [ROADMAP.md](./ROADMAP.md)
