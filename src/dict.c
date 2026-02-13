@@ -34,9 +34,12 @@ static int _dict_find_idx(dict *dict, char *key) {
 }
 
 static int get_next_prime(int num) {
+  if (num <= 2)
+    return 2;
+
   while (true) {
     bool is_prime = true;
-    for (int i = 0; i * i <= num; i++) {
+    for (int i = 2; i * i <= num; i++) {
       if (num % i == 0) {
         is_prime = false;
         break;
@@ -83,7 +86,7 @@ static void _dict_realloc_data(dict *dict, int size) {
 }
 
 dict* dict_alloc() {
-  dict *ret = (dict *)malloc(sizeof(dict));
+  dict *ret = (dict *)calloc(1, sizeof(dict));
   dict_init(ret);
   return ret;
 }
@@ -115,6 +118,7 @@ void dict_insert(dict *dict, char *key, void *value, free_fp free_f) {
   if (dict->bucket[idx].state != USED) {
     dict->bucket[idx].key = strdup(key);
     dict->bucket[idx].state = USED;
+    dict->size++;
   }
   dict->bucket[idx].hash_value = hash_value;
   dict->bucket[idx].value = value;
@@ -124,7 +128,6 @@ void dict_insert(dict *dict, char *key, void *value, free_fp free_f) {
     dict->bucket[idx].free = NULL;
   else
     dict->bucket[idx].free = free_f;
-  dict->size++;
 }
 
 void dict_delete(dict *dict, char *key) {

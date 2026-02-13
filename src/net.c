@@ -14,7 +14,7 @@ wc_sock* wc_socket_init(int port) {
     wc_sock* ret = (wc_sock*)malloc(sizeof(wc_sock));
     ret->server_addr.sin_family = AF_INET;
     ret->server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    if(port < 0 && port > 0xffff) {
+    if(port < 0 || port > 0xffff) {
         perror("invalid port");
         exit(EXIT_FAILURE);
     }

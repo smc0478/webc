@@ -31,7 +31,7 @@ wc* wc_alloc();
 void wc_init(wc* wc, int port);
 void wc_add_route(wc* wc, char* method, char* path, wc_handler f);
 wc_route* wc_get_route(wc* wc, wc_req* req);
-void wc_http_read(wc* wc);
+int wc_http_read(wc* wc);
 void wc_http_write(wc* wc);
 void wc_handle_route(wc* wc, wc_route* route);
 void wc_server_init(int port);
