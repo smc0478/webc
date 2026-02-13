@@ -35,6 +35,18 @@ Artifacts:
 - `lib/libwebc.a`
 - `include/*.h`
 
+## Test (RFC-style request parsing checks)
+```bash
+make test
+```
+
+## Benchmark (request parser microbenchmark)
+```bash
+make benchmark
+# optional custom iterations
+./bench/request_parse_bench.out 500000
+```
+
 ## Run example
 ```bash
 cd example/hello
