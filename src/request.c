@@ -14,7 +14,7 @@ const char* method_str[] = {
 
 
 wc_req* wc_request_alloc() {
-    wc_req* res = (wc_req*)malloc(sizeof(wc_req));
+    wc_req* res = (wc_req*)calloc(1, sizeof(wc_req));
     wc_request_init(res);
 
     return res;
