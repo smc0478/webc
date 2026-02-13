@@ -7,7 +7,7 @@
 #include "dict.h"
 
 wc_resp* wc_response_alloc() {
-    wc_resp* res = (wc_resp*)malloc(sizeof(wc_resp));
+    wc_resp* res = (wc_resp*)calloc(1, sizeof(wc_resp));
     wc_response_init(res);
 
     return res;

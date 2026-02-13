@@ -14,23 +14,32 @@
 wc wc_server;
 
 static inline methods get_method_id(char *method) {
-    for(methods i = GET; i < OTHERS; i++) {
-        if(strcmp(method, method_str[i]) == 0)
+    for (methods i = GET; i < OTHERS; i++) {
+        if (strcmp(method, method_str[i]) == 0)
             return i;
     }
 
     return OTHERS;
 }
 
-wc* wc_alloc() {
-    wc* webc = (wc*)malloc(sizeof(wc));
+static const char* get_reason_phrase(int status) {
+    switch (status) {
+        case 200: return "OK";
+        case 400: return "Bad Request";
+        case 404: return "Not Found";
+        case 500: return "Internal Server Error";
+        default: return "Unknown";
+    }
+}
 
+wc* wc_alloc() {
+    wc* webc = (wc*)calloc(1, sizeof(wc));
     return webc;
 }
 
 void wc_init(wc* wc, int port) {
     wc->server = wc_socket_init(port);
-    for(int i = 0; i < MAX_METHOD_LENGTH; i++)
+    for (int i = 0; i < MAX_METHOD_LENGTH; i++)
         dict_init(&wc->routes[i]);
 }
 
@@ -58,19 +67,23 @@ wc_route* wc_get_route(wc* wc, wc_req* req) {
     return ret;
 }
 
-void wc_http_read(wc* wc) {
-    char buf[1024*2];               // 2MB
+int wc_http_read(wc* wc) {
+    char buf[1024 * 2];
     wc_sock* sock = wc->server;
     int nbytes;
 
-    nbytes = read(sock->client_fd, buf, sizeof(buf)-1);
-    if(buf[nbytes] != '\0')
-        buf[nbytes] = '\0';
+    nbytes = read(sock->client_fd, buf, sizeof(buf) - 1);
+    if (nbytes <= 0)
+        return -1;
 
+    buf[nbytes] = '\0';
     wc->request = wc_parse_request(buf);
-    size_t req_len = strlen(wc->request->raw);
-    printf("%s %s\n", wc->request->method, wc->request->path);
 
+    if (wc->request == NULL || wc->request->method == NULL || wc->request->path == NULL)
+        return -1;
+
+    printf("%s %s\n", wc->request->method, wc->request->path);
+    return 0;
 }
 
 void wc_http_write(wc* wc) {
@@ -79,22 +92,33 @@ void wc_http_write(wc* wc) {
     dict header = res->headers;
 
     FILE* res_write = fdopen(client_fd, "w");
+    if (res_write == NULL) {
+        close(client_fd);
+        return;
+    }
 
-    // method path protocol
-    fprintf(res_write, "HTTP/1.0 %d OK\r\n",res->status);
-    for(int i = 0; i < header.capacity; i++)
-        if(header.bucket[i].state == USED)
-            fprintf(res_write, "%s: %s\r\n", header.bucket[i].key, header.bucket[i].value);
+    fprintf(res_write, "HTTP/1.0 %d %s\r\n", res->status, get_reason_phrase(res->status));
+    for (int i = 0; i < header.capacity; i++)
+        if (header.bucket[i].state == USED)
+            fprintf(res_write, "%s: %s\r\n", header.bucket[i].key, (char*)header.bucket[i].value);
 
 
     fprintf(res_write, "\r\n");
-    fprintf(res_write, "%s", res->body);
+    fprintf(res_write, "%s", res->body ? res->body : "");
 
     fflush(res_write);
+    fclose(res_write);
 }
 
 void wc_handle_route(wc *wc, wc_route *route) {
+    if (route == NULL) {
+        wc->response = wc_response(404, "<h1>404 Not Found</h1>");
+        return;
+    }
+
     wc->response = route->f(wc->request);
+    if (wc->response == NULL)
+        wc->response = wc_response(500, "<h1>500 Internal Server Error</h1>");
 }
 
 void wc_server_init(int port) {
@@ -121,15 +145,18 @@ void wc_server_start() {
 
     wc_socket_listen(wc->server);
 
-    while(1){
+    while (1) {
         wc_socket_accept(wc->server);
 
-        wc_http_read(wc);
+        if (wc_http_read(wc) != 0) {
+            wc->response = wc_response(400, "<h1>400 Bad Request</h1>");
+            wc_http_write(wc);
+            continue;
+        }
 
         wc_route* route = wc_get_route(wc, wc->request);
         wc_handle_route(wc, route);
 
         wc_http_write(wc);
-        close(wc->server->client_fd);
     }
 }

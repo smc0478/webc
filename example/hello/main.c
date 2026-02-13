@@ -10,7 +10,7 @@ wc_resp* hello_name(wc_req* req) {
     wc_resp* ret = wc_response_alloc();
 
     wc_response_set_status(ret, 200);
-    wc_response_set_body(ret, "<p>hello %s!</p>", name);
+    wc_response_set_body(ret, "<p>hello %s!</p>", name ? name : "guest");
 
     return ret;
 }
