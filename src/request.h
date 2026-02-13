@@ -51,10 +51,10 @@ char* wc_request_get_path(wc_req* req);
 char* wc_request_get_param(wc_req* req, param kind, char* key);
 
 #define wc_request_get_query(req,key) \
-    wc_request_get_param(req, QUERY, key);
+    wc_request_get_param(req, QUERY, key)
 
 #define wc_request_get_data(req,key) \
-    wc_request_get_param(req, BODY, key);
+    wc_request_get_param(req, BODY, key)
 
 char* wc_request_get_header(wc_req* req, char* key);
 
