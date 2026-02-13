@@ -3,6 +3,12 @@
 
 #include "request.h"
 
+#define WC_MAX_REQUEST_SIZE 8192
+#define WC_MAX_START_LINE_SIZE 2048
+#define WC_MAX_HEADER_LINE_SIZE 2048
+#define WC_MAX_HEADER_COUNT 100
+#define WC_MAX_BODY_SIZE 4096
+
 enum parse_state {
     req_start,
     req_method,
@@ -23,7 +29,7 @@ enum parse_state {
     req_body_fin,
 };
 
-wc_req* wc_parse_request(char* http);
+wc_req* wc_parse_request(const char* http, size_t http_len);
 
 
 #endif // http.h

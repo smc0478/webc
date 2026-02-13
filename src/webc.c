@@ -3,6 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <strings.h>
 
 #include "webc.h"
 #include "dict.h"
@@ -67,17 +68,109 @@ wc_route* wc_get_route(wc* wc, wc_req* req) {
     return ret;
 }
 
-int wc_http_read(wc* wc) {
-    char buf[1024 * 2];
-    wc_sock* sock = wc->server;
-    int nbytes;
 
-    nbytes = read(sock->client_fd, buf, sizeof(buf) - 1);
-    if (nbytes <= 0)
+static int wc_find_header_end(const char* buf, size_t len, size_t* out_end) {
+    if (len < 4)
+        return 0;
+
+    for (size_t i = 3; i < len; i++) {
+        if (buf[i - 3] == '\r' && buf[i - 2] == '\n' && buf[i - 1] == '\r' && buf[i] == '\n') {
+            *out_end = i + 1;
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+static int wc_parse_content_length(const char* headers, size_t headers_len, size_t* out_content_length) {
+    size_t line_start = 0;
+    *out_content_length = 0;
+
+    while (line_start < headers_len) {
+        size_t line_end = line_start;
+        while (line_end < headers_len && headers[line_end] != '\n')
+            line_end++;
+
+        if (line_end == headers_len)
+            return 0;
+
+        size_t line_len = line_end - line_start;
+        if (line_len > 0 && headers[line_end - 1] == '\r')
+            line_len--;
+        if (line_len == 0)
+            return 1;
+
+        size_t colon = 0;
+        while (colon < line_len && headers[line_start + colon] != ':')
+            colon++;
+
+        if (colon == strlen("Content-Length") &&
+            strncasecmp(headers + line_start, "Content-Length", colon) == 0) {
+            size_t value_start = colon + 1;
+            while (value_start < line_len && (headers[line_start + value_start] == ' ' || headers[line_start + value_start] == '\t'))
+                value_start++;
+
+            size_t value = 0;
+            for (size_t i = value_start; i < line_len; i++) {
+                char ch = headers[line_start + i];
+                if (ch < '0' || ch > '9')
+                    return 0;
+                if (value > (WC_MAX_BODY_SIZE - (size_t)(ch - '0')) / 10)
+                    return 0;
+                value = (value * 10) + (size_t)(ch - '0');
+            }
+
+            *out_content_length = value;
+            return 1;
+        }
+
+        line_start = line_end + 1;
+    }
+
+    return 1;
+}
+
+int wc_http_read(wc* wc) {
+    wc_sock* sock = wc->server;
+    char buf[WC_MAX_REQUEST_SIZE + 1];
+    size_t total = 0;
+    ssize_t nbytes;
+    size_t header_end = 0;
+    size_t content_length = 0;
+    size_t expected_total = 0;
+    int header_complete = 0;
+
+    while (total < WC_MAX_REQUEST_SIZE) {
+        nbytes = read(sock->client_fd, buf + total, WC_MAX_REQUEST_SIZE - total);
+        if (nbytes <= 0)
+            break;
+
+        total += (size_t)nbytes;
+        buf[total] = '\0';
+
+        if (!header_complete && wc_find_header_end(buf, total, &header_end)) {
+            header_complete = 1;
+            if (!wc_parse_content_length(buf, header_end, &content_length))
+                return -1;
+            expected_total = header_end + content_length;
+
+            if (expected_total > WC_MAX_REQUEST_SIZE)
+                return -1;
+        }
+
+        if (header_complete && total >= expected_total)
+            break;
+    }
+
+    if (total == 0 || total > WC_MAX_REQUEST_SIZE || !header_complete)
         return -1;
 
-    buf[nbytes] = '\0';
-    wc->request = wc_parse_request(buf);
+    if (expected_total > total)
+        return -1;
+
+    buf[expected_total] = '\0';
+    wc->request = wc_parse_request(buf, expected_total);
 
     if (wc->request == NULL || wc->request->method == NULL || wc->request->path == NULL)
         return -1;
